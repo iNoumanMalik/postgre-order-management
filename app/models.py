@@ -1,46 +1,50 @@
-from sqlalchemy import Column, Integer, String, Float, ForeignKey, DateTime
-from sqlalchemy.orm import relationship
+from sqlalchemy import Integer, String, Float, ForeignKey, DateTime
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 from datetime import datetime
 from database import Base
 
+
 class User(Base):
     __tablename__ = "users"
-    id: Column(Integer,primary_key=True)
-    name: Column(String, nullable=False)
-    email: Column(String, nullable=False)
-    created_at: Column(DateTime, default=datetime.utcnow)
-    
-    orders = relationship("Order",back_populates="user")
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    email: Mapped[str] = mapped_column(String, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    orders = relationship("Order", back_populates="user")
+
 
 class Product(Base):
     __tablename__ = "products"
-    id: Column(Integer,primary_key=True)
-    name: Column(String, nullable=False)
-    price: Column(Float, nullable=False)
-    sku: Column(String, unique=True, nullable=False)
-    created_at: Column(DateTime, default=datetime.utcnow)
-    
-    order_items = relationship("OrderItem",back_populates="product")
-    
-    
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    name: Mapped[str] = mapped_column(String, nullable=False)
+    price: Mapped[float] = mapped_column(Float, nullable=False)
+    sku: Mapped[str] = mapped_column(String, unique=True, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    order_items = relationship("OrderItem", back_populates="product")
+
+
 class Order(Base):
     __tablename__ = "orders"
-    id: Column(Integer,primary_key=True)
-    user_id: Column(Integer, ForeignKey(users.id))
-    created_at: Column(DateTime, default=datetime.utcnow)
-    
-    user = relationship("User",back_populates="orders")
-    items = relationship("OrderItem",back_populates="order")
-    
-    
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    user = relationship("User", back_populates="orders")
+    items = relationship("OrderItem", back_populates="order")
+
 
 class OrderItem(Base):
-    __tablename__ = "orderitems"
-    id: Column(Integer,primary_key=True)
-    product_id: Column(Integer, ForeignKey(products.id))
-    order_id: Column(Integer, ForeignKey(orders.id))
-    quantity: Column(Integer,default=1)
-    
-    order = relationship("Order",back_populates="items")
-    Product = relationship("Product",back_populates="order_items")
-    
+    __tablename__ = "order_items"
+
+    id: Mapped[int] = mapped_column(primary_key=True)
+    product_id: Mapped[int] = mapped_column(ForeignKey("products.id"))
+    order_id: Mapped[int] = mapped_column(ForeignKey("orders.id"))
+    quantity: Mapped[int] = mapped_column(default=1)
+
+    order = relationship("Order", back_populates="items")
+    product = relationship("Product", back_populates="order_items")
